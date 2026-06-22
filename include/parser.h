@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "ring_buffer.h"
 #include "simd.h"
 
 
@@ -31,11 +32,28 @@ namespace Parsing {
         std::uint8_t flags;
     };
 
-    class FastRejectBase {
+    inline constexpr std::size_t LineRingCap = 1 << 14;
+    using LineRing = SPSC::RingBuffer<LineDescriptor, LineRingCap>;
+
+    class FastReject {
+        public:
+            void scan(const char* begin, const char* end, LineRing& out) noexcept;
     };
 
-    class SlowPass {
+    // placeholder
+    using Findings = std::size_t;
 
+    class SlowPass {
+        public:
+            Findings process(const LineDescriptor& line) const;
+        private:
+    };
+
+    class Parser {
+        public:
+        private:
+            const char* mmap_;
+            LineRing buf_{};
     };
 
 } // namespace Parsing

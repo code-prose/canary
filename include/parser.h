@@ -27,6 +27,22 @@ namespace Parsing {
         return (static_cast<std::uint8_t>(c) & static_cast<std::uint8_t>(bit)) != 0;
     }
 
+    enum class Kind : std::uint8_t {
+        Ssn,
+        CardNumber,
+        Email,
+        UID
+    };
+
+    struct Finding {
+        Kind kind;
+        std::uint32_t line;
+        std::uint32_t offset;
+        std::uint32_t len;
+    };
+
+    using Findings = std::vector<Finding>;
+
     struct LineDescriptor {
         const char* start;
         std::uint32_t len; // does not include \n, \n\n, len == 0
@@ -41,13 +57,12 @@ namespace Parsing {
             void scan(const char* begin, const char* end, LineRing& out) noexcept;
     };
 
-    // placeholder
-    using Findings = std::vector<LineDescriptor>;
 
     class SlowPass {
         public:
-            Findings process(const LineDescriptor& line) const;
+            void process(const LineDescriptor& line, Findings& out) const;
         private:
+            Findings merge();
     };
 
     class Parser {

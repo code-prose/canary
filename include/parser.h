@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vector>
 #include "ring_buffer.h"
 #include "simd.h"
 
@@ -41,7 +42,7 @@ namespace Parsing {
     };
 
     // placeholder
-    using Findings = std::size_t;
+    using Findings = std::vector<LineDescriptor>;
 
     class SlowPass {
         public:

@@ -9,6 +9,8 @@ namespace SPSC {
         RingBuffer() = default;
         bool push(T elem);
         bool pop(T& out);
+        void finish() noexcept { done_.store(true, std::memory_order_release); }
+        bool closed() noexcept { return done_.load(std::memory_order_acquire); }
     private:
         alignas(64) std::atomic_size_t front_{0};
         alignas(64) std::size_t cached_back_{0};
@@ -16,8 +18,6 @@ namespace SPSC {
         alignas(64) std::size_t cached_front_{0};
         alignas(64) T data_[N];
         std::atomic<bool> done_{false};
-
-        void constexpr finish() noexcept { done_.store(true, std::memory_order_seq_cst); }
     };
 
     template <typename T, std::size_t N>

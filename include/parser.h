@@ -70,7 +70,7 @@ namespace Parsing {
 
     class Parser {
         public:
-            Report run(std::string path) const;
+            Report run(const std::string& path);
         private:
             LineRing buf_{};
             int fd_{-1};

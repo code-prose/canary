@@ -4,26 +4,29 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string>
-#include <iostream>
+#include <system_error>
 
 class Mapping {
     public:
         Mapping(const std::string& path) {
             fd_ = open(path.c_str(), O_RDONLY);
             if (fd_ == -1) {
-                throw std::system_error(errno, std::generic_category(), "open " + path);
+                throw std::system_error(errno, std::generic_category(), "open " + path + '\n');
             }
 
             struct stat st;
             if (fstat(fd_, &st) == -1) {
-                throw std::system_error(errno, std::generic_category(), "fstat");
+                throw std::system_error(errno, std::generic_category(), "fstat\n");
             }
             len_ = static_cast<std::size_t>(st.st_size);
+            if (len_ == 0) {
+                mmap_ = nullptr;
+                return;
+            }
 
             mmap_ = static_cast<char*>(mmap(NULL, len_, PROT_READ, MAP_PRIVATE, fd_, 0));
-
             if (mmap_ == MAP_FAILED) {
-                std::cerr << "Failed to memory map file\n";
+                throw std::system_error(errno, std::generic_category(), "mmap\n");
             }
 
         }
@@ -32,12 +35,11 @@ class Mapping {
         Mapping& operator=(const Mapping& rhs) = delete;
 
         ~Mapping() {
-            close(fd_);
-            munmap(mmap_, len_);
-            // tear down mmap
+            if (mmap_ && mmap_ != MAP_FAILED) { munmap(mmap_, len_); }
+            if (fd_ != -1) { close(fd_); }
         }
 
-        char* data() const { return mmap_; }
+        const char* data() const { return mmap_; }
         std::size_t length() const { return len_; }
     private:
         char* mmap_;

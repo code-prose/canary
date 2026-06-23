@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string>
 #include <filesystem>
+#include <iostream>
 
 class Mapping {
     public:
@@ -17,7 +18,11 @@ class Mapping {
             }
 
             len_ = std::filesystem::file_size(path);
-            mmap_ = static_cast<char*>(mmap(NULL, len_, PROT_READ, MAP_SHARED, fd_, 0));
+            mmap_ = static_cast<char*>(mmap(NULL, len_, PROT_READ, MAP_PRIVATE, fd_, 0));
+
+            if (mmap_ == MAP_FAILED) {
+                std::cerr << "Failed to memory map file\n";
+            }
         }
 
         ~Mapping() {

@@ -1,22 +1,23 @@
 #pragma once
 #include <atomic>
-#include <optional>
 
 namespace SPSC {
-
     template <typename T, std::size_t N>
     // I should probably be able to scale N
     class RingBuffer {
     public:
         RingBuffer() = default;
         bool push(T elem);
-        std::optional<T> pop();
+        bool pop(T& out);
     private:
         alignas(64) std::atomic_size_t front_{0};
         alignas(64) std::size_t cached_back_{0};
         alignas(64) std::atomic_size_t back_{0};
         alignas(64) std::size_t cached_front_{0};
         alignas(64) T data_[N];
+        std::atomic<bool> done_{false};
+
+        void constexpr finish() noexcept { done_.store(true, std::memory_order_seq_cst); }
     };
 
     template <typename T, std::size_t N>
@@ -40,7 +41,7 @@ namespace SPSC {
     }
 
     template <typename T, std::size_t N>
-    std::optional<T> RingBuffer<T, N>::pop() {
+    bool RingBuffer<T, N>::pop(T& out) {
         std::size_t back, front;
         front = std::atomic_load_explicit(&front_, std::memory_order_relaxed);
         back = cached_back_;
@@ -49,12 +50,12 @@ namespace SPSC {
         }
 
         if (back == front) {
-            return std::nullopt;
+            return false;
         }
 
-        T elem = data_[front];
+        out = data_[front];
         std::atomic_store_explicit(&front_, (front + 1) % N, std::memory_order_release);
-        return elem;
+        return true;
     }
 
 }

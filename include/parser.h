@@ -36,12 +36,15 @@ namespace Parsing {
 
     struct Finding {
         Kind kind;
-        std::uint32_t line;
-        std::uint32_t offset;
+        std::uint64_t pos;
         std::uint32_t len;
     };
 
     using Findings = std::vector<Finding>;
+
+    struct Report {
+        Findings all;
+    };
 
     struct LineDescriptor {
         const char* start;
@@ -61,15 +64,21 @@ namespace Parsing {
     class SlowPass {
         public:
             void process(const LineDescriptor& line, Findings& out) const;
+            static constexpr void rebase(Finding& finding, const char* base_pos) noexcept;
         private:
-            Findings merge();
     };
 
     class Parser {
         public:
+            Report run(std::string path) const;
         private:
-            const char* mmap_;
             LineRing buf_{};
+            int fd_{-1};
+            const char* mmap_;
+            std::size_t mmap_len_;
+
+            // Will be used when I swap from spsc to fan out
+            // Findings merge(std::vector<Findings>& all);
     };
 
 } // namespace Parsing

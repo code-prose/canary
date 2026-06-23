@@ -73,8 +73,6 @@ namespace Parsing {
             Report run(const std::string& path);
         private:
             LineRing buf_{};
-            int fd_{-1};
-            const char* mmap_;
             std::size_t mmap_len_;
 
             // Will be used when I swap from spsc to fan out

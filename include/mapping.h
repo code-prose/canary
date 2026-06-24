@@ -39,7 +39,7 @@ class Mapping {
             if (fd_ != -1) { close(fd_); }
         }
 
-        const char* data() const { return mmap_; }
+        char* data() const { return mmap_; }
         std::size_t length() const { return len_; }
     private:
         char* mmap_;

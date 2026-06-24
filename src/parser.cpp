@@ -16,8 +16,9 @@ Parsing::Report Parsing::Parser::run(const std::string& path) {
     const char* mmap_;
     Report report{};
 
-    auto producer = []{
+    auto producer = [&]{
         FastReject frj{};
+        frj.scan(m.data(), m.data() + m.length(), buf_);
     };
 
     auto consumer = []{

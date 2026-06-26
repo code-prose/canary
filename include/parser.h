@@ -31,7 +31,8 @@ namespace Parsing {
         Ssn,
         CardNumber,
         Email,
-        UID
+        UID,
+        FalsePos
     };
 
     struct Finding {

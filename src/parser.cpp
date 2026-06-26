@@ -1,6 +1,5 @@
 #include <string>
 #include <thread>
-
 #include "parser.h"
 #include "mapping.h"
 
@@ -16,12 +15,12 @@ Parsing::Report Parsing::Parser::run(const std::string& path) {
     const char* mmap_;
     Report report{};
 
-    auto producer = [&]{
+    auto prod = [&m, this]{
         FastReject frj{};
         frj.scan(m.data(), m.data() + m.length(), buf_);
     };
 
-    auto consumer = [&]{
+    auto cons = [&m, &report, this]{
         SlowPass sp{};
         bool val_returned = false;
         Findings findings{};
@@ -34,7 +33,27 @@ Parsing::Report Parsing::Parser::run(const std::string& path) {
         }
 
         for (auto& finding : findings) { sp.rebase(finding, m.data()); }
+        report.all = findings;
     };
 
-    // some alerting code
+    std::thread producer{prod};
+    std::thread consumer{cons};
+
+    producer.detach();
+    consumer.join();
+
+    return report;
+}
+
+
+void Parsing::FastReject::scan(const char* begin, const char* end, LineRing& out) noexcept {
+    // wrote overload for universal ref so I can std::move()
+}
+
+void Parsing::SlowPass::process(const LineDescriptor& line, Findings& out) const {
+
+}
+
+constexpr void Parsing::SlowPass::rebase(Finding& finding, const char* base_pos) noexcept {
+
 }

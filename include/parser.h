@@ -53,6 +53,8 @@ namespace Parsing {
         std::uint8_t flags;
     };
 
+    // this feels like it could be too large but also FastReject will process so much faster that SlowPass might fail to keep up, should be largely input dependent
+    // is it possible to autoscale this??????
     inline constexpr std::size_t LineRingCap = 1 << 14;
     using LineRing = SPSC::RingBuffer<LineDescriptor, LineRingCap>;
 

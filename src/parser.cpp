@@ -4,10 +4,6 @@
 #include "mapping.h"
 
 // need different static inits for simd::mask
-//
-//
-// need to check .done() in consumer
-//
 
 // Parser
 Parsing::Report Parsing::Parser::run(const std::string& path) {
@@ -20,6 +16,7 @@ Parsing::Report Parsing::Parser::run(const std::string& path) {
         frj.scan(m.data(), m.data() + m.length(), buf_);
     };
 
+    // this feels so ugly
     auto cons = [&m, &report, this]{
         SlowPass sp{};
         bool val_returned = false;

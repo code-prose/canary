@@ -47,6 +47,7 @@ void Parsing::FastReject::scan(const char* begin, const char* end, LineRing& out
     // wrote overload for universal ref so I can std::move()
     // what the fuck does this refer to?
     // ringbuf?
+    // yes
 }
 
 void Parsing::SlowPass::process(const LineDescriptor& line, Findings& out) const {

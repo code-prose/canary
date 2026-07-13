@@ -64,9 +64,8 @@ void Parsing::FastReject::scan(const char* begin, const char* end, LineRing& out
         auto colons = vceqq_u8(chunk, colon_mask);
         auto colon_hit = vmaxvq_u8(colons) != 0;
 
-        if (!colon_hit && count > 5) { // want to tune this probably
-            cand = cand | Candidate::Digit;
-        }
+        auto ssnish = !colon_hit && count > 5;
+        cand = ssnish ? cand | Candidate::Digit : cand; // collapsed branch prediction, csel now
 
         // also a branch prediction issue, this is explicitly the hot path so I don't want to be guessing at branches
         if (cand != Candidate::None) {

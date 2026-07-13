@@ -50,7 +50,7 @@ namespace Parsing {
     struct LineDescriptor {
         const char* start;
         std::uint32_t len; // does not include \n, \n\n, len == 0
-        std::uint8_t flags;
+        Candidate flags;
     };
 
     // this feels like it could be too large but also FastReject will process so much faster that SlowPass might fail to keep up, should be largely input dependent

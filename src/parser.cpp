@@ -1,3 +1,4 @@
+#include <arm_neon.h>
 #include <string>
 #include <thread>
 #include "parser.h"
@@ -48,6 +49,32 @@ void Parsing::FastReject::scan(const char* begin, const char* end, LineRing& out
     // what the fuck does this refer to?
     // ringbuf?
     // yes
+    const uint8x16_t zero_mask{vdupq_n_u8('0')};
+    const uint8x16_t nine_mask{vdupq_n_u8('9')}; // why doesn't this work?
+    const uint8x16_t colon_mask{vdupq_n_u8(':')};
+    while (begin + simd::kStride <= end) {
+        Candidate cand = Candidate::None;
+        auto chunk = vld1q_u8(reinterpret_cast<const uint8_t*>(begin));
+        auto mask = vandq_u8(
+                vcgeq_u8(chunk, zero_mask),
+                vcgeq_u8(nine_mask, chunk));
+        auto hits = vshrq_n_u8(mask, 7);
+        auto count = vaddvq_u8(hits);
+
+        auto colons = vceqq_u8(chunk, colon_mask);
+        auto colon_hit = vmaxvq_u8(colons) != 0;
+
+        if (!colon_hit && count > 5) { // want to tune this probably
+            cand = cand | Candidate::Digit;
+        }
+
+        // also a branch prediction issue, this is explicitly the hot path so I don't want to be guessing at branches
+        if (cand != Candidate::None) {
+            out.push(LineDescriptor{.start = begin, .len = simd::kStride, .flags = cand});
+        }
+
+        begin += simd::kStride;
+    }
 }
 
 void Parsing::SlowPass::process(const LineDescriptor& line, Findings& out) const {

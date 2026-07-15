@@ -68,7 +68,8 @@ void Parsing::FastReject::scan(const char* begin, const char* end, LineRing& out
         cand = ssnish ? cand | Candidate::Digit : cand; // collapsed branch prediction, csel now
 
         // also a branch prediction issue, this is explicitly the hot path so I don't want to be guessing at branches
-        if (cand != Candidate::None) {
+        // this is unlikely? So it's okay? Depends on tuning probably
+        if (cand != Candidate::None) [[unlikely]] {
             out.push(LineDescriptor{.start = begin, .len = simd::kStride, .flags = cand});
         }
 

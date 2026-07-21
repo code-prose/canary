@@ -9,3 +9,5 @@ Parse logs at volume to catch leaked PII such as SSNs, Addresses, etc. within yo
     Leverages SIMD comparison to quickly scan and reject lines that don't have any signs of PII
 - Slow Pass
     Uses more computation expensive methods (i.e. Regex) to comprehensively detect leaked PII
+
+Should I bench this?
